@@ -3,12 +3,13 @@ import xml.etree.ElementTree as ET
 from Crypto.Cipher import AES
 from Crypto.Cipher.AES import MODE_CBC
 from Crypto.Util.Padding import  unpad
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5
 from io import BytesIO
 from urllib.request import urlopen,Request
 from urllib.parse import urlencode
 from argparse import ArgumentParser
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import serialization
+
 import sys
 import ssl
 import os
@@ -67,11 +68,7 @@ if encrypt_key==None:
     quit()
 
 with open('private.key', 'rb') as key_file:
-    private_key = serialization.load_pem_private_key(
-        key_file.read(),
-        password=None,
-    )
-
+    private_key = RSA.importKey(key_file.read())
 context = ssl.create_default_context()
 context.set_ciphers("DEFAULT:@SECLEVEL=1")
 response=json.loads(urlopen(Request("https://api.melonbooks.co.jp/app/auth.php",data=urlencode({
@@ -91,7 +88,7 @@ if not response["melonbooks"]["status"]["code"]==200:
     print(response)
     quit()
 encrypted_drm_key=bytes.fromhex(json.loads(response["melonbooks"]["result"]["orders"][0]["drm_key"])["data"]["key"])
-drm_key=private_key.decrypt(encrypted_drm_key,padding=padding.PKCS1v15())
+drm_key=PKCS1_v1_5.new(private_key).decrypt(encrypted_drm_key,sentinel=None)
 aes=AES.new(drm_key,MODE_CBC,iv=iv)
 key=unpad(aes.decrypt(encrypt_key),AES.block_size)   
 
