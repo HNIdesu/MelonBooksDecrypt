@@ -49,6 +49,8 @@ with open(filepath,"rb") as br:
         chunk_header=br.read(4).decode("utf-8")
         chunk_size=int.from_bytes(br.read(4),byteorder="little")
         chunk_data=br.read(chunk_size)
+        if(chunk_size%2!=0):
+            br.seek(1,1)
         if chunk_header=="META":
             xml=ET.fromstring(chunk_data.decode("utf-8"))
             content_id=xml.find("content_id").text
