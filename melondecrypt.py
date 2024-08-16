@@ -94,7 +94,6 @@ encrypted_drm_key=bytes.fromhex(json.loads(response["melonbooks"]["result"]["ord
 drm_key=private_key.decrypt(encrypted_drm_key,padding=padding.PKCS1v15())
 aes=AES.new(drm_key,MODE_CBC,iv=iv)
 key=unpad(aes.decrypt(encrypt_key),AES.block_size)   
-chunk_list=list[bytes]()
 
 dest_filepath=Path.join(output_directory,pathlib.Path(filepath).with_suffix(f".{filetype}").name)
 with BytesIO(data_chunk) as br:
