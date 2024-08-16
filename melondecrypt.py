@@ -1,20 +1,20 @@
 import json
 import xml.etree.ElementTree as ET
-from Crypto.Cipher import AES
-from Crypto.Cipher.AES import MODE_CBC
-from Crypto.Util.Padding import  unpad
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5
-from io import BytesIO
-from urllib.request import urlopen,Request
-from urllib.parse import urlencode
-from argparse import ArgumentParser
-
 import sys
 import ssl
 import os
 import pathlib
 import os.path as Path 
+from io import BytesIO
+from urllib.request import urlopen,Request
+from urllib.parse import urlencode
+from argparse import ArgumentParser
+
+from Crypto.Cipher import AES
+from Crypto.Cipher.AES import MODE_CBC
+from Crypto.Util.Padding import  unpad
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5
 
 parser=ArgumentParser()
 parser.add_argument("filepath",help="the path of the melon file")
@@ -26,6 +26,11 @@ args=parser.parse_args(sys.argv[1:])
 filepath=args.filepath
 email=args.email
 password=args.password
+
+def resource_path(resource_name):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, resource_name)
+    return os.path.join(Path.dirname(__file__), resource_name)
 
 if args.output:
     output_directory=args.output
@@ -67,7 +72,7 @@ if encrypt_key==None:
     print("key not found")
     quit()
 
-with open('private.key', 'rb') as key_file:
+with open(resource_path('private.key'), 'rb') as key_file:
     private_key = RSA.importKey(key_file.read())
 context = ssl.create_default_context()
 context.set_ciphers("DEFAULT:@SECLEVEL=1")
